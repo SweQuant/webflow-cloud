@@ -1,0 +1,15 @@
+{
+  "name": "plot-assets",
+  "framework": "static",
+  "build": {
+    "command": "",
+    "output": "."
+  },
+  "routes": [
+    {
+      "src": "/.*",
+      "dest": "/index.html",
+      "status": 200
+    }
+  ]
+}
