@@ -20,13 +20,19 @@
     return text
       .trim()
       .split(/\r?\n/)
-      .map((row) =>
-        row
-          .trim()
-          .split(/[\,\t]\s*|\s+/)
-          .filter((cell) => cell.length > 0)
-          .map((cell) => cell.trim())
-      )
+      .map((row) => {
+        const trimmedRow = row.trim();
+        if (trimmedRow === '') {
+          return [];
+        }
+
+        const hasDelimitedSeparators = /[\,\t]/.test(trimmedRow);
+        const cells = hasDelimitedSeparators
+          ? trimmedRow.split(/[\,\t]/)
+          : trimmedRow.split(/\s+/);
+
+        return cells.map((cell) => cell.trim());
+      })
       .map(normalisePoint)
       .filter((point) => point && !Number.isNaN(point.frequency) && !Number.isNaN(point.value));
   }
@@ -48,6 +54,19 @@
       console.warn('[animated-spectrum-plot] Space-delimited sample failed to parse via loadData pipeline.', parsedSample);
     } else {
       console.debug('[animated-spectrum-plot] Space-delimited sample parsed for loadData check.', parsedSample);
+    }
+
+    const sampleCommaDelimited = '100,,0.5';
+    const parsedCommaSample = parseCsv(sampleCommaDelimited);
+    const preservesEmptyCellAlignment =
+      parsedCommaSample.length > 0 &&
+      parsedCommaSample[0].frequency === 100 &&
+      parsedCommaSample[0].value === 0;
+
+    if (!preservesEmptyCellAlignment) {
+      console.warn('[animated-spectrum-plot] Comma-delimited sample failed to preserve empty cell alignment.', parsedCommaSample);
+    } else {
+      console.debug('[animated-spectrum-plot] Comma-delimited sample preserved empty cell alignment.', parsedCommaSample);
     }
   }
 
