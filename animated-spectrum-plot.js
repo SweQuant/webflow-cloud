@@ -1,15 +1,4 @@
 (function () {
-  const root = document.querySelector('[data-plotly-spectrum]');
-  if (!root || typeof Plotly === 'undefined') {
-    if (!root) {
-      console.warn('[animated-spectrum-plot] Missing root element with data-plotly-spectrum attribute.');
-    }
-    if (typeof Plotly === 'undefined') {
-      console.warn('[animated-spectrum-plot] Plotly library not loaded.');
-    }
-    return;
-  }
-
   const DATASTEP_TARGET_FRAMES = 90;
 
   function normalisePoint(point) {
@@ -44,7 +33,7 @@
       .filter((point) => point && !Number.isNaN(point.frequency) && !Number.isNaN(point.value));
   }
 
-  async function loadData() {
+  async function loadData(root) {
     const inline = root.querySelector('script[type="application/json"]');
     if (inline) {
       try {
@@ -124,7 +113,7 @@
     return { frames, frequencies, values };
   }
 
-  function buildLayout(points) {
+  function buildLayout(root, points) {
     const bandTokens = (root.dataset.bandHighlights || '')
       .split('|')
       .map((band) => band.trim())
@@ -235,7 +224,7 @@
     };
   }
 
-  function buildTrace(points) {
+  function buildTrace(root, points) {
     const frequencies = points.map((point) => point.frequency);
     const values = points.map((point) => point.value);
     const initialFrequency = frequencies.length ? frequencies[0] : null;
@@ -257,15 +246,26 @@
   }
 
   async function init() {
-    const points = (await loadData()).slice().sort((a, b) => a.frequency - b.frequency);
+    const root = document.querySelector('[data-plotly-spectrum]');
+    if (!root) {
+      console.warn('[animated-spectrum-plot] Missing root element with data-plotly-spectrum attribute.');
+      return;
+    }
+
+    if (typeof Plotly === 'undefined') {
+      console.warn('[animated-spectrum-plot] Plotly library not loaded.');
+      return;
+    }
+
+    const points = (await loadData(root)).slice().sort((a, b) => a.frequency - b.frequency);
     if (!points.length) {
       return;
     }
 
     const { frames, frequencies, values } = makeFrames(points);
-    const trace = buildTrace(points);
+    const trace = buildTrace(root, points);
 
-    const layout = buildLayout(points);
+    const layout = buildLayout(root, points);
     const config = {
       responsive: true,
       displaylogo: false,
