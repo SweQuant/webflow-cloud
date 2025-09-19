@@ -200,7 +200,7 @@
         gridcolor: '#E2E8F0',
       },
       margin: { t: 60, r: 40, b: 60, l: 70 },
-      plot_bgcolor: '#FFFFFF',
+      plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       hovermode: 'x unified',
       hoverlabel: {
