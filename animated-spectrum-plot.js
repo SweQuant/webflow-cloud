@@ -20,9 +20,35 @@
     return text
       .trim()
       .split(/\r?\n/)
-      .map((row) => row.split(/,|\t/).map((cell) => cell.trim()))
+      .map((row) =>
+        row
+          .trim()
+          .split(/[\,\t]\s*|\s+/)
+          .filter((cell) => cell.length > 0)
+          .map((cell) => cell.trim())
+      )
       .map(normalisePoint)
       .filter((point) => point && !Number.isNaN(point.frequency) && !Number.isNaN(point.value));
+  }
+
+  if (typeof window !== 'undefined' && !window.__ANIMATED_SPECTRUM_PLOT_SPACE_CHECK__) {
+    window.__ANIMATED_SPECTRUM_PLOT_SPACE_CHECK__ = true;
+    const sampleSpaceDelimited = '100 0.5\n200 0.6';
+    const parsedSample = parseCsv(sampleSpaceDelimited);
+    const hasNumericValues =
+      parsedSample.length > 0 &&
+      parsedSample.every(
+        (point) =>
+          typeof point.frequency === 'number' &&
+          typeof point.value === 'number' &&
+          !Number.isNaN(point.frequency) &&
+          !Number.isNaN(point.value)
+      );
+    if (!hasNumericValues) {
+      console.warn('[animated-spectrum-plot] Space-delimited sample failed to parse via loadData pipeline.', parsedSample);
+    } else {
+      console.debug('[animated-spectrum-plot] Space-delimited sample parsed for loadData check.', parsedSample);
+    }
   }
 
   function parseJson(text) {
